@@ -1,25 +1,30 @@
-import logo from './logo.svg';
+import Loading from "./page/Loading";
+import Error404 from "./page/error/404";
+import Template from "./component/Template";
+
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom"
+import React, {lazy, Suspense} from "react";
 import './App.css';
 
+const Home = lazy(() => import("./page/Home"));
+const Game = lazy(() => import("./page/Game"));
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	return (
+		
+		<Router>
+			<Template
+				children={
+					<Routes>
+						<Route path="*" element={<Suspense fallback={<Loading/>}><Error404/></Suspense>}/>
+						<Route path="/" element={<Suspense fallback={<Loading/>}><Home/></Suspense>}/>
+						<Route path="/game" element={<Suspense fallback={<Loading/>}><Game/></Suspense>}/>
+					</Routes>
+				}
+			/>
+		</Router>
+	
+	);
 }
 
 export default App;
