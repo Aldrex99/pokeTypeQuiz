@@ -1,6 +1,7 @@
 {
   "name": "poketypequiz",
   "version": "0.1.0",
+  "homepage": "https://aldrex-ca.fr/",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.7",
