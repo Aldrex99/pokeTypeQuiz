@@ -426,17 +426,19 @@ export default function Question() {
 					score={score}
 					totalQuestions={totalQuestions}
 				/>) : null}
-			<div className="w-screen flex flex-col justify-center items-center">
-				<div className="w-1/2 px-12 h-20 my-4 flex flex-row justify-center items-center bg-white rounded rounded-2xl">
+			<div className="w-screen px-4 flex flex-col justify-center items-center">
+				<div
+					className="lg:w-1/2 w-full px-12 h-fit my-4 flex flex-row justify-center items-center bg-white rounded rounded-2xl">
 					<p className="w-1/3 text-center">Score : {score}</p>
 					<p className="w-1/3 text-center"></p>
 					<p className="w-1/3 text-center">Question : {questionNumber} / {totalQuestions}</p>
 				</div>
-				<div className="w-1/2 p-4 h-fit mb-4 flex flex-col justify-center items-center bg-white rounded rounded-2xl">
+				<div
+					className="lg:w-1/2 w-full p-4 h-fit mb-4 flex flex-col justify-center items-center bg-white rounded rounded-2xl">
 					<img className="m-4 w-36" src={getMiniature(generatedQuestion[2])} alt="icon"/>
 					<p className="m-4 text-center">{generatedQuestion[0]}</p>
 				</div>
-				<div className="grid grid-cols-4 gap-3 justify-center items-center">
+				<div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-3 justify-center items-center">
 					{generatedAnswer.map((answer, index) => {
 							if (index !== null) {
 								return (
@@ -444,7 +446,7 @@ export default function Question() {
 										key={index}
 										value={answer}
 										onClick={(e) => handleClick(e, generatedQuestion[1], generatedQuestion[2])}
-										className="w-44 flex flex-row items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-2xl"
+										className="lg:w-44 w-32 flex flex-row items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-2xl"
 									>
 										<img src={getIcon(answer)} alt={answer} className="w-6 h-6"/>
 										<span className="m-4">{capitalizeFirstLetter(answer)}</span>
@@ -454,7 +456,7 @@ export default function Question() {
 						}
 					)}
 					<button
-						className="w-full col-start-1 col-end-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+						className="w-full lg:col-start-1 lg:col-end-5 col-start-1 col-end-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
 						value="autre"
 						onClick={(e) => handleClick(e, generatedQuestion[1], generatedQuestion[2])}
 					>Aucune de ces réponses
