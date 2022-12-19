@@ -22,8 +22,8 @@ import miniatureEau from '../asset/TypeMiniature/eau.png';
 import iconEau from '../asset/TypeIcon/eau.png';
 import miniaturePlante from '../asset/TypeMiniature/plante.png';
 import iconPlante from '../asset/TypeIcon/plante.png';
-import miniatureElectrique from '../asset/TypeMiniature/electrique.png';
-import iconElectrique from '../asset/TypeIcon/electrique.png';
+import miniatureElectrik from '../asset/TypeMiniature/electrik.png';
+import iconElectrik from '../asset/TypeIcon/electrik.png';
 import miniaturePsy from '../asset/TypeMiniature/psy.png';
 import iconPsy from '../asset/TypeIcon/psy.png';
 import miniatureGlace from '../asset/TypeMiniature/glace.png';
@@ -35,7 +35,8 @@ import iconTenebres from '../asset/TypeIcon/tenebres.png';
 import miniatureFee from '../asset/TypeMiniature/fee.png';
 import iconFee from '../asset/TypeIcon/fee.png';
 
-import {useEffect, useState} from 'react';
+import {useEffect, useReducer, useState} from 'react';
+import QuizEndedModal from "./QuizEndedModal";
 
 
 const type = [
@@ -68,11 +69,11 @@ const type = [
 		name: "combat",
 		miniature: miniatureCombat,
 		icon: iconCombat,
-		weakness: ["vol", "psy", "fee"],
-		resistance: ["insecte", "roche", "tenebres"],
+		weakness: ["vol", "psy", "fée"],
+		resistance: ["insecte", "roche", "ténèbres"],
 		immunity: [],
-		strengthTo: ["normal", "glace", "roche", "acier", "tenebres"],
-		weaknessTo: ["poison", "vol", "psy", "fee", "insecte"],
+		strengthTo: ["normal", "glace", "roche", "acier", "ténèbres"],
+		weaknessTo: ["poison", "vol", "psy", "fée", "insecte"],
 		uselessTo: ["spectre"],
 	},
 	// Vol
@@ -80,11 +81,11 @@ const type = [
 		name: "vol",
 		miniature: miniatureVol,
 		icon: iconVol,
-		weakness: ["electrique", "glace", "roche"],
+		weakness: ["electrik", "glace", "roche"],
 		resistance: ["combat", "plante", "insecte"],
 		immunity: ["sol"],
 		strengthTo: ["combat", "plante", "insecte"],
-		weaknessTo: ["electrique", "acier", "roche"],
+		weaknessTo: ["electrik", "acier", "roche"],
 		uselessTo: [],
 	},
 	// Poison
@@ -93,9 +94,9 @@ const type = [
 		miniature: miniaturePoison,
 		icon: iconPoison,
 		weakness: ["sol", "psy"],
-		resistance: ["combat", "fee", "insecte", "plante", "poison"],
+		resistance: ["combat", "fée", "insecte", "plante", "poison"],
 		immunity: [],
-		strengthTo: ["plante", "fee"],
+		strengthTo: ["plante", "fée"],
 		weaknessTo: ["poison", "sol", "roche", "spectre"],
 		uselessTo: ["acier"],
 	},
@@ -106,8 +107,8 @@ const type = [
 		icon: iconSol,
 		weakness: ["eau", "plante", "glace"],
 		resistance: ["poison", "roche"],
-		immunity: ["electrique"],
-		strengthTo: ["poison", "roche", "acier", "feu", "electrique"],
+		immunity: ["electrik"],
+		strengthTo: ["poison", "roche", "acier", "feu", "electrik"],
 		weaknessTo: ["plante", "insecte"],
 		uselessTo: ["vol"],
 	},
@@ -131,8 +132,8 @@ const type = [
 		weakness: ["feu", "vol", "roche"],
 		resistance: ["combat", "plante", "sol"],
 		immunity: [],
-		strengthTo: ["plante", "psy", "tenebres"],
-		weaknessTo: ["acier", "feu", "combat", "fee", "vol", "poison", "spectre"],
+		strengthTo: ["plante", "psy", "ténèbres"],
+		weaknessTo: ["acier", "feu", "combat", "fée", "vol", "poison", "spectre"],
 		uselessTo: [],
 	},
 	// Spectre
@@ -140,11 +141,11 @@ const type = [
 		name: "spectre",
 		miniature: miniatureSpectre,
 		icon: iconSpectre,
-		weakness: ["spectre", "tenebres"],
+		weakness: ["spectre", "ténèbres"],
 		resistance: ["poison", "insecte"],
 		immunity: ["normal", "combat"],
 		strengthTo: ["spectre", "psy"],
-		weaknessTo: ["tenebres"],
+		weaknessTo: ["ténèbres"],
 		uselessTo: ["normal"],
 	},
 	// Acier
@@ -153,10 +154,10 @@ const type = [
 		miniature: miniatureAcier,
 		icon: iconAcier,
 		weakness: ["feu", "combat", "sol"],
-		resistance: ["acier", "dragon", "fee", "glace", "insecte", "normal", "plante", "psy", "roche", "vol"],
+		resistance: ["acier", "dragon", "fée", "glace", "insecte", "normal", "plante", "psy", "roche", "vol"],
 		immunity: ["poison"],
-		strengthTo: ["glace", "roche", "fee"],
-		weaknessTo: ["acier", "feu", "eau", "electrique"],
+		strengthTo: ["glace", "roche", "fée"],
+		weaknessTo: ["acier", "feu", "eau", "electrik"],
 	},
 	// Feu
 	{
@@ -164,7 +165,7 @@ const type = [
 		miniature: miniatureFeu,
 		icon: iconFeu,
 		weakness: ["eau", "sol", "roche"],
-		resistance: ["acier", "feu", "glace", "plante", "insecte", "fee"],
+		resistance: ["acier", "feu", "glace", "plante", "insecte", "fée"],
 		immunity: [],
 		strengthTo: ["plante", "glace", "insecte", "acier"],
 		weaknessTo: ["eau", "feu", "roche", "dragon"],
@@ -175,7 +176,7 @@ const type = [
 		name: "eau",
 		miniature: miniatureEau,
 		icon: iconEau,
-		weakness: ["plante", "electrique"],
+		weakness: ["plante", "electrik"],
 		resistance: ["acier", "feu", "glace", "eau"],
 		immunity: [],
 		strengthTo: ["sol", "roche", "feu"],
@@ -188,22 +189,22 @@ const type = [
 		miniature: miniaturePlante,
 		icon: iconPlante,
 		weakness: ["feu", "glace", "insecte", "vol", "poison"],
-		resistance: ["sol", "eau", "electrique", "plante"],
+		resistance: ["sol", "eau", "electrik", "plante"],
 		immunity: [],
 		strengthTo: ["sol", "roche", "eau"],
 		weaknessTo: ["acier", "dragon", "feu", "insecte", "plante", "poison", "vol"],
 		uselessTo: [],
 	},
-	// Electrique
+	// Electrik
 	{
-		name: "electrique",
-		miniature: miniatureElectrique,
-		icon: iconElectrique,
+		name: "electrik",
+		miniature: miniatureElectrik,
+		icon: iconElectrik,
 		weakness: ["sol"],
-		resistance: ["vol", "electrique", "acier"],
+		resistance: ["vol", "electrik", "acier"],
 		immunity: [],
 		strengthTo: ["vol", "eau"],
-		weaknessTo: ["electrique", "plante", "dragon"],
+		weaknessTo: ["electrik", "plante", "dragon"],
 		uselessTo: ["sol"],
 	},
 	// Psy
@@ -211,12 +212,12 @@ const type = [
 		name: "psy",
 		miniature: miniaturePsy,
 		icon: iconPsy,
-		weakness: ["spectre", "tenebres", "insecte"],
+		weakness: ["spectre", "ténèbres", "insecte"],
 		resistance: ["combat", "psy"],
 		immunity: [],
 		strengthTo: ["combat", "poison"],
 		weaknessTo: ["psy", "acier"],
-		uselessTo: ["tenebres"],
+		uselessTo: ["ténèbres"],
 	},
 	// Glace
 	{
@@ -235,34 +236,34 @@ const type = [
 		name: "dragon",
 		miniature: miniatureDragon,
 		icon: iconDragon,
-		weakness: ["dragon", "glace", "fee"],
-		resistance: ["feu", "eau", "electrique", "plante"],
+		weakness: ["dragon", "glace", "fée"],
+		resistance: ["feu", "eau", "electrik", "plante"],
 		immunity: [],
 		strengthTo: ["dragon"],
 		weaknessTo: ["acier"],
-		uselessTo: ["fee"],
+		uselessTo: ["fée"],
 	},
 	// Ténèbres
 	{
-		name: "tenebres",
+		name: "ténèbres",
 		miniature: miniatureTenebres,
 		icon: iconTenebres,
-		weakness: ["combat", "fee", "insecte"],
-		resistance: ["spectre", "tenebres"],
+		weakness: ["combat", "fée", "insecte"],
+		resistance: ["spectre", "ténèbres"],
 		immunity: ["psy"],
 		strengthTo: ["spectre", "psy"],
-		weaknessTo: ["combat", "fee", "tenebres"],
+		weaknessTo: ["combat", "fée", "ténèbres"],
 		uselessTo: [],
 	},
 	// Fee
 	{
-		name: "fee",
+		name: "fée",
 		miniature: miniatureFee,
 		icon: iconFee,
 		weakness: ["poison", "acier"],
-		resistance: ["combat", "insecte", "tenebres"],
+		resistance: ["combat", "insecte", "ténèbres"],
 		immunity: ["dragon"],
-		strengthTo: ["combat", "dragon", "tenebres"],
+		strengthTo: ["combat", "dragon", "ténèbres"],
 		weaknessTo: ["feu", "poison", "acier"],
 		uselessTo: [],
 	}
@@ -272,12 +273,15 @@ const questions = [
 	{
 		questionPartGlobal: "Parmi ces propostions ",
 		questionPart1: [
-			{questionType: "weakness", questionText: "quelle est la / les faiblesse(s) des pokémons de type "},
-			{questionType: "resistance", questionText: "quelle est la / les résistance(s) des pokémons de type "},
-			{questionType: "immunity", questionText: "quelle est l'immunité des pokémons de type "},
-			{questionType: "strengthTo", questionText: "quel type reçoit des dégats doublés des attaque de type "},
-			{questionType: "weaknessTo", questionText: "quel type reçoit des dégats divisé par 2 des attaque de type "},
-			{questionType: "uselessTo", questionText: "quel type n'est pas affecté par les attaques de type "},
+			{questionType: "weakness", questionText: "quel type inflige des dégats doublés au pokémon de type "},
+			{questionType: "resistance", questionText: "quel type inflige des dégats réduits de moitiés au pokémon de type "},
+			{questionType: "immunity", questionText: "quel type n'inflige aucun dégats au pokémon de type "},
+			{questionType: "strengthTo", questionText: "quel type de pokémon reçoit des dégats doublés des attaque de type "},
+			{
+				questionType: "weaknessTo",
+				questionText: "quel type de pokémon reçoit des dégats divisé par 2 des attaque de type "
+			},
+			{questionType: "uselessTo", questionText: "quel type de pokémon n'est pas affecté par les attaques de type "},
 		],
 		questionPart2: " ?",
 	}
@@ -286,6 +290,12 @@ const questions = [
 export default function Question() {
 	const [generatedQuestion, setGeneratedQuestion] = useState([]);
 	const [generatedAnswer, setGeneratedAnswer] = useState([]);
+	const [score, setScore] = useState(0);
+	const [questionNumber, setQuestionNumber] = useState(0);
+	const [totalQuestions, setTotalQuestions] = useState(20);
+	const [resultMessage, setResultMessage] = useState("");
+	const [quizEnded, setQuizEnded] = useState(false);
+	const [modalEndedOpen, toggleEndedModal] = useReducer((open) => !open, false);
 	
 	
 	// Fonction Random
@@ -303,7 +313,7 @@ export default function Question() {
 		const questionPart1 = question.questionPart1[getRandomInt(question.questionPart1.length)];
 		const questionType = questionPart1.questionType;
 		// Resultat
-		const questionCompleted = question.questionPartGlobal + questionPart1.questionText + pokemonType + question.questionPart2;
+		const questionCompleted = question.questionPartGlobal + questionPart1.questionText + capitalizeFirstLetter(pokemonType) + question.questionPart2;
 		
 		return [questionCompleted, questionType, pokemonType];
 	}
@@ -341,10 +351,15 @@ export default function Question() {
 	
 	// Génération de la question et des propositions
 	function generate() {
-		const question = generateQuestion();
-		const propositions = generatePropositions(question[1], question[2]);
-		setGeneratedQuestion(question);
-		setGeneratedAnswer(propositions[0]);
+		if (questionNumber < totalQuestions) {
+			const question = generateQuestion();
+			const propositions = generatePropositions(question[1], question[2]);
+			setGeneratedQuestion(question);
+			setGeneratedAnswer(propositions[0]);
+			setQuestionNumber(questionNumber + 1);
+		} else {
+			setQuizEnded(true);
+		}
 	}
 	
 	// Vérification de la réponse
@@ -354,10 +369,11 @@ export default function Question() {
 		const pokemonTypeProposition = type[pokemonTypeNumber][questionType];
 		console.log(pokemonTypeProposition)
 		if (pokemonTypeProposition.includes(answer) || pokemonTypeProposition.length === 0) {
-			
-			console.log("Bonne réponse");
+			setScore(score + 1);
+			setResultMessage("Bonne réponse !");
 		} else {
 			console.log("Mauvaise réponse");
+			setResultMessage("Mauvaise réponse !");
 		}
 	}
 	
@@ -369,22 +385,58 @@ export default function Question() {
 		}
 	}
 	
+	// Récupération de la miniature du type de pokemon
+	function getMiniature(pokemonType) {
+		if (pokemonType !== undefined) {
+			const pokemonTypeNumber = type.findIndex((type) => type.name === pokemonType);
+			return type[pokemonTypeNumber].miniature;
+		}
+	}
+	
+	// Transformer la première lettre en majuscule
+	function capitalizeFirstLetter(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+	
+	// Vérification de la réponse au clic sur une proposition + génération de la question et des propositions
+	function handleClick(e, questionType, pokemonType) {
+		checkAnswer(e.target.value, questionType, pokemonType);
+		generate();
+	}
 	
 	// Génération de la question et des propositions au chargement de la page
 	useEffect(() => {
 		generate();
 	}, []);
 	
-	function handleClick(e, questionType, pokemonType) {
-		checkAnswer(e.target.value, questionType, pokemonType);
-		generate();
-	}
+	// Ouverture du modal
+	useEffect(() => {
+		if (quizEnded) {
+			toggleEndedModal();
+		}
+	}, [quizEnded]);
 	
 	return (
 		<div className="flex flex-col h-full justify-center items-center bg-gray-200">
-			<div className="flex flex-col justify-center items-center">
-				<p>{generatedQuestion[0]}</p>
-				<div className="flex flex-row justify-center items-center">
+			{quizEnded ? (
+				<QuizEndedModal
+					modalEndedOpen={modalEndedOpen}
+					toggleEndedModal={toggleEndedModal}
+					title="Quiz terminé !"
+					score={score}
+					totalQuestions={totalQuestions}
+				/>) : null}
+			<div className="w-screen flex flex-col justify-center items-center">
+				<div className="w-1/2 px-12 h-20 my-4 flex flex-row justify-center items-center bg-white rounded rounded-2xl">
+					<p className="w-1/3 text-center">Score : {score}</p>
+					<p className="w-1/3 text-center"></p>
+					<p className="w-1/3 text-center">Question : {questionNumber} / {totalQuestions}</p>
+				</div>
+				<div className="w-1/2 p-4 h-fit mb-4 flex flex-col justify-center items-center bg-white rounded rounded-2xl">
+					<img className="m-4 w-36" src={getMiniature(generatedQuestion[2])} alt="icon"/>
+					<p className="m-4 text-center">{generatedQuestion[0]}</p>
+				</div>
+				<div className="grid grid-cols-4 gap-3 justify-center items-center">
 					{generatedAnswer.map((answer, index) => {
 							if (index !== null) {
 								return (
@@ -392,25 +444,35 @@ export default function Question() {
 										key={index}
 										value={answer}
 										onClick={(e) => handleClick(e, generatedQuestion[1], generatedQuestion[2])}
-										className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full m-2"
+										className="w-44 flex flex-row items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-2xl"
 									>
-										<img src={getIcon(answer)} alt={answer} className="w-8 h-8"/>
-										{answer}
+										<img src={getIcon(answer)} alt={answer} className="w-6 h-6"/>
+										<span className="m-4">{capitalizeFirstLetter(answer)}</span>
 									</button>
 								)
 							}
 						}
 					)}
-					
-					
 					<button
-						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full m-2"
+						className="w-full col-start-1 col-end-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
 						value="autre"
 						onClick={(e) => handleClick(e, generatedQuestion[1], generatedQuestion[2])}
 					>Aucune de ces réponses
 					</button>
 				</div>
 			</div>
+			{resultMessage !== "" ? (
+				<div className="w-screen flex flex-col justify-center items-center">
+					<div className="w-1/2 p-4 mt-2 flex flex-col justify-center items-center">
+						<p className={
+							resultMessage === "Bonne réponse !" ?
+								"text-center text-green-500 font-bold text-xl" : "text-center text-red-500 font-bold text-xl"
+						}>
+							{resultMessage}
+						</p>
+					</div>
+				</div>
+			) : null}
 		</div>
 	)
 }
