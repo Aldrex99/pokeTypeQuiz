@@ -158,6 +158,7 @@ const type = [
 		immunity: ["poison"],
 		strengthTo: ["glace", "roche", "fée"],
 		weaknessTo: ["acier", "feu", "eau", "electrik"],
+		uselessTo: [],
 	},
 	// Feu
 	{
@@ -273,15 +274,36 @@ const questions = [
 	{
 		questionPartGlobal: "Parmi ces propostions ",
 		questionPart1: [
-			{questionType: "weakness", questionText: "quel type inflige des dégats doublés au pokémon de type "},
-			{questionType: "resistance", questionText: "quel type inflige des dégats réduits de moitiés au pokémon de type "},
-			{questionType: "immunity", questionText: "quel type n'inflige aucun dégats au pokémon de type "},
-			{questionType: "strengthTo", questionText: "quel type de pokémon reçoit des dégats doublés des attaque de type "},
+			{
+				questionType: "weakness",
+				questionText1: "à quel type le type ",
+				questionText2: " est-il PEU-RÉSISTANT",
+			},
+			{
+				questionType: "resistance",
+				questionText1: "à quel type le type ",
+				questionText2: " est-il RÉSISTANT",
+			},
+			{
+				questionType: "immunity",
+				questionText1: "contre quel type le type ",
+				questionText2: " est-il IMMUNISÉ",
+			},
+			{
+				questionType: "strengthTo",
+				questionText1: "sur quel type, le type ",
+				questionText2: " est-il SUPER-EFFICACE",
+			},
 			{
 				questionType: "weaknessTo",
-				questionText: "quel type de pokémon reçoit des dégats divisé par 2 des attaque de type "
+				questionText1: "sur quel type, le type ",
+				questionText2: " est-il PEU-EFFICACE",
 			},
-			{questionType: "uselessTo", questionText: "quel type de pokémon n'est pas affecté par les attaques de type "},
+			{
+				questionType: "uselessTo",
+				questionText1: "sur quel type, le type ",
+				questionText2: " est-il INEFFICACE",
+			},
 		],
 		questionPart2: " ?",
 	}
@@ -313,7 +335,7 @@ export default function Question() {
 		const questionPart1 = question.questionPart1[getRandomInt(question.questionPart1.length)];
 		const questionType = questionPart1.questionType;
 		// Resultat
-		const questionCompleted = question.questionPartGlobal + questionPart1.questionText + capitalizeFirstLetter(pokemonType) + question.questionPart2;
+		const questionCompleted = question.questionPartGlobal + questionPart1.questionText1 + capitalizeFirstLetter(pokemonType) + questionPart1.questionText2 + question.questionPart2;
 		
 		return [questionCompleted, questionType, pokemonType];
 	}
@@ -322,10 +344,13 @@ export default function Question() {
 	function generatePropositions(questionType, pokemonType) {
 		let propositions = [];
 		let noProposition = false;
+		let pokemonTypeProposition = null;
 		// Génération de la propostion de réponse à partir du type de pokemon
-		const pokemonTypeNumber = type.findIndex((type) => type.name === pokemonType);
-		const pokemonTypeProposition = type[pokemonTypeNumber][questionType];
-		if (pokemonTypeProposition.length === 0) {
+		while (pokemonTypeProposition === null) {
+			const pokemonTypeNumber = type.findIndex((type) => type.name === pokemonType);
+			pokemonTypeProposition = type[pokemonTypeNumber][questionType];
+		}
+		if (pokemonTypeProposition && pokemonTypeProposition.length === 0) {
 			let proposition1 = type[getRandomInt(type.length)].name
 			propositions.push(proposition1);
 			noProposition = true;
@@ -333,6 +358,7 @@ export default function Question() {
 			let proposition1 = pokemonTypeProposition[getRandomInt(pokemonTypeProposition.length)];
 			propositions.push(proposition1);
 		}
+		
 		// Génération des 3 autres propositions
 		for (let i = 0; i < 3; i++) {
 			let proposition = type[getRandomInt(type.length)].name;
@@ -365,14 +391,11 @@ export default function Question() {
 	// Vérification de la réponse
 	function checkAnswer(answer, questionType, pokemonType) {
 		const pokemonTypeNumber = type.findIndex((type) => type.name === pokemonType);
-		console.log(pokemonTypeNumber)
 		const pokemonTypeProposition = type[pokemonTypeNumber][questionType];
-		console.log(pokemonTypeProposition)
-		if (pokemonTypeProposition.includes(answer) || pokemonTypeProposition.length === 0) {
+		if (pokemonTypeProposition.includes(answer) || (pokemonTypeProposition.length === 0 && answer === "aucun")) {
 			setScore(score + 1);
 			setResultMessage("Bonne réponse !");
 		} else {
-			console.log("Mauvaise réponse");
 			setResultMessage("Mauvaise réponse !");
 		}
 	}
@@ -399,8 +422,8 @@ export default function Question() {
 	}
 	
 	// Vérification de la réponse au clic sur une proposition + génération de la question et des propositions
-	function handleClick(e, questionType, pokemonType) {
-		checkAnswer(e.target.value, questionType, pokemonType);
+	function handleClick(answer, questionType, pokemonType) {
+		checkAnswer(answer, questionType, pokemonType);
 		generate();
 	}
 	
@@ -445,7 +468,7 @@ export default function Question() {
 									<button
 										key={index}
 										value={answer}
-										onClick={(e) => handleClick(e, generatedQuestion[1], generatedQuestion[2])}
+										onClick={() => handleClick(answer, generatedQuestion[1], generatedQuestion[2])}
 										className="lg:w-44 w-32 flex flex-row items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-2xl"
 									>
 										<img src={getIcon(answer)} alt={answer} className="w-6 h-6"/>
@@ -457,8 +480,8 @@ export default function Question() {
 					)}
 					<button
 						className="w-full lg:col-start-1 lg:col-end-5 col-start-1 col-end-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-						value="autre"
-						onClick={(e) => handleClick(e, generatedQuestion[1], generatedQuestion[2])}
+						value="aucun"
+						onClick={() => handleClick("aucun", generatedQuestion[1], generatedQuestion[2])}
 					>Aucune de ces réponses
 					</button>
 				</div>
